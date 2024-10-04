@@ -1,0 +1,32 @@
+{
+  "name": "websocket-chat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/app.js",
+  "scripts": {
+    "start": "node dist/app.js",
+    "dev": "nodemon dist/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuliasemenyuk/WebSocket-CHAT.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yuliasemenyuk/WebSocket-CHAT/issues"
+  },
+  "homepage": "https://github.com/yuliasemenyuk/WebSocket-CHAT#readme",
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "nodemon": "^3.1.7"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "http": "^0.0.1-security",
+    "mongodb": "^6.9.0",
+    "mongoose": "^8.7.0",
+    "socket.io": "^4.8.0"
+  }
+}
