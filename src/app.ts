@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import http from "http";
 import { Server } from "socket.io";
 import mongoose from "mongoose";
+import { setupSocketHandlers } from "./controllers/socketHandler";
 
 dotenv.config();
 
@@ -27,23 +28,9 @@ mongoose.connect(DB_URL)
     process.exit(1);
   });
 
-io.on('connection', (socket) => {
-  console.log('A user connected');
-  
-  socket.on('disconnect', () => {
-    console.log('User disconnected');
-  });
-  
-});
+setupSocketHandlers(io);
 
 const port = PORT || 3000;
 server.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
-
-process.on('unhandledRejection', (error) => {
-  console.error('Unhandled Promise Rejection:', error);
-  process.exit(1);
-});
-
-export { app, io };
