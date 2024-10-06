@@ -11,15 +11,25 @@ export function setupSocketHandlers(io: Server) {
 
   io.sockets.on("connection", async (client: Socket) => {
     console.log("A client connected");
-
-    // const broadcast = (event: string, data: any) => {
-    //   client.emit(event, data);
-    //   client.broadcast.emit(event, data);
-    // };
-    // Send current users list to the newly connected client
     client.emit("usersList", getUsersList());
 
-    client.on("login", async (userName: string) => {
+    client.on('login', async (sessionToken: string) => {
+      try {
+        const user = await userService.getUserBySessionToken(sessionToken);
+        if (user) {
+          users[client.id] = { _id: user._id, name: user.name };
+          client.emit("loginSuccess", {
+            sessionToken: user.sessionToken,
+            user: { id: user._id, name: user.name },
+          });
+          io.emit("usersList", getUsersList());
+        } 
+      } catch (error) {
+        throw new Error("Failed to login");
+      }
+    })
+
+    client.on("create", async (userName: string) => {
       try {
         const user = await userService.createUser(userName);
         // Send the session token back to the client
