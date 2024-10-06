@@ -1,6 +1,6 @@
 import { Server, Socket } from "socket.io";
 import { userService } from "../services/userService";
-import { User, ConnectedUsers } from '../utils/types';
+import { User, ConnectedUsers, Message } from '../utils/types';
 
 export function setupSocketHandlers(io: Server) {
   const users: ConnectedUsers = {};
@@ -51,8 +51,21 @@ export function setupSocketHandlers(io: Server) {
     });
 
     client.on("message", (message) => {
-      //add handling name change????
-      io.emit("message", message);
+      const user = users[client.id];
+      if (user) {
+        const fullMessage = {
+          userId: user._id,
+          userName: user.name,
+          content: message.content,
+          timestamp: message.timestamp || Date.now()
+        };
+        
+        // Broadcast the message to all clients
+        io.emit("message", fullMessage);
+      } else {
+        console.error("Message received from unknown user");
+        client.emit("error", "You are not logged in");
+      }
     });
 
     client.on('disconnect', () => {

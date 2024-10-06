@@ -17,7 +17,10 @@ export interface ConnectedUsers {
   [clientId: string]: ConnectedUser;
 }
 
-
+export interface Message {
+  content: string;
+  timestamp: number;
+}
 export interface RequestWithUser extends Request {
   user: User;
 }
