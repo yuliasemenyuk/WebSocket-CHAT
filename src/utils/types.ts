@@ -8,6 +8,16 @@ export interface User {
 }
 
 //Other
+export interface ConnectedUser {
+  _id: string;
+  name: string;
+}
+
+export interface ConnectedUsers {
+  [clientId: string]: ConnectedUser;
+}
+
+
 export interface RequestWithUser extends Request {
   user: User;
 }

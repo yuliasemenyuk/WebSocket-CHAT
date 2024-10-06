@@ -10,6 +10,7 @@ export const userService = {
   async createUser(name: string): Promise<User> {
     const sessionToken = uuidv4();
     const user = await UserModel.create({ name, sessionToken });
+    console.log(user)
     return user;
   },
 

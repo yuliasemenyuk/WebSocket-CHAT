@@ -5,7 +5,7 @@
   "main": "dist/app.js",
   "scripts": {
     "start": "node dist/app.js",
-    "dev": "nodemon dist/app.js"
+    "start:dev": "nodemon dist/app.js"
   },
   "repository": {
     "type": "git",
@@ -23,6 +23,7 @@
     "nodemon": "^3.1.7"
   },
   "dependencies": {
+    "@types/js-cookie": "^3.0.6",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
