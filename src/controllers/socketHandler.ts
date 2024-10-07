@@ -1,6 +1,8 @@
+import fs from "fs";
+import path from "path";
 import { Server, Socket } from "socket.io";
 import { userService } from "../services/userService";
-import { User, ConnectedUsers, Message } from '../utils/types';
+import { User, ConnectedUsers, Message, OutMessage } from "../utils/types";
 
 export function setupSocketHandlers(io: Server) {
   const users: ConnectedUsers = {};
@@ -8,12 +10,11 @@ export function setupSocketHandlers(io: Server) {
     return Object.values(users).map(({ _id, name }) => ({ id: _id, name }));
   }
 
-
   io.sockets.on("connection", async (client: Socket) => {
     console.log("A client connected");
     client.emit("usersList", getUsersList());
 
-    client.on('login', async (sessionToken: string) => {
+    client.on("login", async (sessionToken: string) => {
       try {
         const user = await userService.getUserBySessionToken(sessionToken);
         if (user) {
@@ -23,11 +24,11 @@ export function setupSocketHandlers(io: Server) {
             user: { id: user._id, name: user.name },
           });
           io.emit("usersList", getUsersList());
-        } 
+        }
       } catch (error) {
         throw new Error("Failed to login");
       }
-    })
+    });
 
     client.on("create", async (userName: string) => {
       try {
@@ -52,15 +53,30 @@ export function setupSocketHandlers(io: Server) {
 
     client.on("message", (message) => {
       const user = users[client.id];
+      console.log(user, "user")
       if (user) {
-        const fullMessage = {
-          userId: user._id,
-          userName: user.name,
-          content: message.content,
-          timestamp: message.timestamp || Date.now()
-        };
-        
+        let fullMessage: OutMessage;
+        if (message.type && message.type === "audio") {
+          const audioBuffer = Buffer.from(message.content, "base64");
+          fullMessage = {
+            userId: user._id.toString(),
+            userName: user.name,
+            type: "audio",
+            content: audioBuffer, 
+            timestamp: message.timestamp || Date.now(),
+          };
+        } else {
+          fullMessage = {
+            userId: user._id,
+            userName: user.name,
+            type: "text",
+            content: message.content,
+            timestamp: message.timestamp || Date.now(),
+          };
+        }
+
         // Broadcast the message to all clients
+        console.log(fullMessage)
         io.emit("message", fullMessage);
       } else {
         console.error("Message received from unknown user");
@@ -68,11 +84,11 @@ export function setupSocketHandlers(io: Server) {
       }
     });
 
-    client.on('disconnect', () => {
+    client.on("disconnect", () => {
       if (users[client.id]) {
         delete users[client.id];
         // Broadcast updated users list after a user disconnects
-        io.emit('usersList', getUsersList());
+        io.emit("usersList", getUsersList());
       }
     });
   });
