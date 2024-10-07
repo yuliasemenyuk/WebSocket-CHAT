@@ -1,7 +1,6 @@
-import fs from "fs";
-import path from "path";
 import { Server, Socket } from "socket.io";
 import { userService } from "../services/userService";
+import { msgHistoryService } from "../services/msgHistoryService";
 import { User, ConnectedUsers, Message, OutMessage } from "../utils/types";
 
 export function setupSocketHandlers(io: Server) {
@@ -51,7 +50,7 @@ export function setupSocketHandlers(io: Server) {
       }
     });
 
-    client.on("message", (message) => {
+    client.on("message", async (message) => {
       const user = users[client.id];
       console.log(user, "user")
       if (user) {
@@ -78,6 +77,8 @@ export function setupSocketHandlers(io: Server) {
         // Broadcast the message to all clients
         console.log(fullMessage)
         io.emit("message", fullMessage);
+        //Save to msg history
+        await msgHistoryService.saveMessage(fullMessage);
       } else {
         console.error("Message received from unknown user");
         client.emit("error", "You are not logged in");

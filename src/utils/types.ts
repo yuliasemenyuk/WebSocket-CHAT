@@ -1,5 +1,5 @@
 import { Request } from "express";
-
+import {Schema} from "mongoose";
 //Models interfaces
 export interface User {
   _id: string;
@@ -23,7 +23,7 @@ export interface Message {
 }
 
 export interface OutMessage {
-  userId: string,
+  userId: string | Schema.Types.ObjectId,
   userName: string,
   type: "text" | "audio",
   content: string | ArrayBuffer,
