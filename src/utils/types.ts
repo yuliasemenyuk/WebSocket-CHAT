@@ -1,5 +1,5 @@
 import { Request } from "express";
-import {Schema} from "mongoose";
+import mongoose from "mongoose";
 //Models interfaces
 export interface User {
   _id: string;
@@ -23,11 +23,11 @@ export interface Message {
 }
 
 export interface OutMessage {
-  userId: string | Schema.Types.ObjectId,
-  userName: string,
-  type: "text" | "audio",
-  content: string | ArrayBuffer,
-  timestamp: string
+  userId: mongoose.Types.ObjectId | string;
+  userName: string;
+  type: "text" | "audio";
+  content: string | Buffer;
+  timestamp: number;
 }
 export interface RequestWithUser extends Request {
   user: User;

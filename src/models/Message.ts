@@ -14,11 +14,11 @@ const messageSchema = new Schema<OutMessage>(
       enum: ["audio", "text"],
     },
     content: {
-      type: String || ArrayBuffer,
+      type: Schema.Types.Mixed,
       required: [true, "Set message content"],
     },
     timestamp: {
-      type: String,
+      type: Number,
       required: [true, "Set timestamp for the message"],
     },
   },

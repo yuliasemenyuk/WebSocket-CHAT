@@ -22,6 +22,10 @@ export function setupSocketHandlers(io: Server) {
             sessionToken: user.sessionToken,
             user: { id: user._id, name: user.name },
           });
+          
+          const history = await msgHistoryService.getLastMessages();
+
+          client.emit("history", history);
           io.emit("usersList", getUsersList());
         }
       } catch (error) {
@@ -52,7 +56,7 @@ export function setupSocketHandlers(io: Server) {
 
     client.on("message", async (message) => {
       const user = users[client.id];
-      console.log(user, "user")
+      console.log(user, "user");
       if (user) {
         let fullMessage: OutMessage;
         if (message.type && message.type === "audio") {
@@ -61,7 +65,7 @@ export function setupSocketHandlers(io: Server) {
             userId: user._id.toString(),
             userName: user.name,
             type: "audio",
-            content: audioBuffer, 
+            content: audioBuffer,
             timestamp: message.timestamp || Date.now(),
           };
         } else {
@@ -75,7 +79,7 @@ export function setupSocketHandlers(io: Server) {
         }
 
         // Broadcast the message to all clients
-        console.log(fullMessage)
+        console.log(fullMessage);
         io.emit("message", fullMessage);
         //Save to msg history
         await msgHistoryService.saveMessage(fullMessage);
