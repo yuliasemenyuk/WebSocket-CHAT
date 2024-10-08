@@ -1,7 +1,7 @@
 import { Server, Socket } from "socket.io";
 import { userService } from "../services/userService";
 import { msgHistoryService } from "../services/msgHistoryService";
-import { User, ConnectedUsers, Message, OutMessage } from "../utils/types";
+import { ConnectedUsers, OutMessage } from "../utils/types";
 
 export function setupSocketHandlers(io: Server) {
   const users: ConnectedUsers = {};
@@ -17,12 +17,16 @@ export function setupSocketHandlers(io: Server) {
       try {
         const user = await userService.getUserBySessionToken(sessionToken);
         if (user) {
-          users[client.id] = { _id: user._id, name: user.name };
+          users[client.id] = {
+            _id: user._id,
+            name: user.name,
+            sessionToken: user.sessionToken,
+          };
           client.emit("loginSuccess", {
             sessionToken: user.sessionToken,
             user: { id: user._id, name: user.name },
           });
-
+          //Show last msgs to new user
           const history = await msgHistoryService.getLastMessages();
           client.emit("history", history);
           io.emit("usersList", getUsersList());
@@ -37,11 +41,18 @@ export function setupSocketHandlers(io: Server) {
         const user = await userService.createUser(userName);
         // Send the session token back to the client
         if (user) {
-          users[client.id] = { _id: user._id, name: user.name };
+          users[client.id] = {
+            _id: user._id,
+            name: user.name,
+            sessionToken: user.sessionToken,
+          };
           client.emit("loginSuccess", {
             sessionToken: user.sessionToken,
             user: { id: user._id, name: user.name },
           });
+          //Show last msgs to new user
+          const history = await msgHistoryService.getLastMessages();
+          client.emit("history", history);
           // Broadcast updated users list to all clients
           io.emit("usersList", getUsersList());
         } else {
@@ -49,42 +60,49 @@ export function setupSocketHandlers(io: Server) {
         }
       } catch (error) {
         console.error("Login error:", error);
-        client.emit("loginError", "Failed to create user");
+        client.emit("loginError");
       }
     });
 
     client.on("message", async (message) => {
-      const user = users[client.id];
-      console.log(user, "user");
-      if (user) {
-        let fullMessage: OutMessage;
-        if (message.type && message.type === "audio") {
-          const audioBuffer = Buffer.from(message.content, "base64");
-          fullMessage = {
-            userId: user._id.toString(),
-            userName: user.name,
-            type: "audio",
-            content: audioBuffer,
-            timestamp: message.timestamp || Date.now(),
-          };
-        } else {
-          fullMessage = {
-            userId: user._id,
-            userName: user.name,
-            type: "text",
-            content: message.content,
-            timestamp: message.timestamp || Date.now(),
-          };
-        }
+      try {
+        const user = users[client.id];
+        console.log(user, "user");
+        if (user) {
+          //Length validation
+          if (message.type === "text" && message.content.length > 1000) {
+            throw Error("Message is too long");
+          }
 
-        // Broadcast the message to all clients
-        console.log(fullMessage);
-        io.emit("message", fullMessage);
-        //Save to msg history
-        await msgHistoryService.saveMessage(fullMessage);
-      } else {
-        console.error("Message received from unknown user");
-        client.emit("error", "You are not logged in");
+          //Session validation
+          if (
+            !message.sessionToken ||
+            message.sessionToken.toString() !== user.sessionToken.toString()
+          ) {
+            client.emit("loginError");
+          } else {
+            const fullMessage: OutMessage = {
+              userId: user._id.toString(),
+              userName: user.name,
+              type: message.type,
+              content: message.content,
+              timestamp: message.timestamp || Date.now(),
+              sessionToken: message.sessionToken,
+            };
+            console.log(fullMessage);
+            io.emit("message", fullMessage);
+            //Save to msg history
+            await msgHistoryService.saveMessage(fullMessage);
+            //Return message success status to sender
+            client.emit("messageSuccess");
+          }
+        } else {
+          console.error("Message received from unknown user");
+          throw new Error("Failed to sent message");
+        }
+      } catch (error) {
+        console.error(error);
+        client.emit("messageError");
       }
     });
 

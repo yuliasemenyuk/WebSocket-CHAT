@@ -28,6 +28,7 @@ const messageSchema = new Schema<OutMessage>(
       type: Number,
       required: [true, "Set timestamp for the message"],
     },
+    sessionToken: {type: String, required: [true, "Set sender's session token"]}
   },
   {
     versionKey: false,

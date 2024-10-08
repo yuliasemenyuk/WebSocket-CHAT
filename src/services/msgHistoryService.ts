@@ -22,6 +22,7 @@ export const msgHistoryService = {
       type: doc.type,
       content: doc.type === "audio" ? doc.content : doc.content.toString(),
       timestamp: doc.timestamp,
+      sessionToken: doc.sessionToken
     }));
 
     return plainHistory.sort((a, b) => a.timestamp - b.timestamp);

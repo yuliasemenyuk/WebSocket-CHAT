@@ -1,23 +1,23 @@
 import { Request } from "express";
 import mongoose from "mongoose";
-//Models interfaces
 export interface User {
   _id: string;
   name: string;
   sessionToken: string;
 }
 
-//Other
 export interface ConnectedUser {
   _id: string;
   name: string;
+  sessionToken: string
 }
 
 export interface ConnectedUsers {
-  [clientId: string]: ConnectedUser;
+  [clientId: string]: User;
 }
 
 export interface Message {
+  type: "text" | "audio";
   content: string;
   timestamp: number;
 }
@@ -28,7 +28,5 @@ export interface OutMessage {
   type: "text" | "audio";
   content: string | Buffer;
   timestamp: number;
-}
-export interface RequestWithUser extends Request {
-  user: User;
+  sessionToken: string
 }
