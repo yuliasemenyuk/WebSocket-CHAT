@@ -6,6 +6,8 @@ export const msgHistoryService = {
     let messageToSave = message;
     if (message.type === "audio") {
       messageToSave.content = Buffer.from(message.content);
+    } else if (message.type === "text" && typeof message.content === "string"){
+        messageToSave.content = Buffer.from(message.content, 'utf8')
     }
     await MessageModel.create(messageToSave);
   },
@@ -18,7 +20,7 @@ export const msgHistoryService = {
       userId: doc.userId.toString(),
       userName: doc.userName,
       type: doc.type,
-      content: doc.type === "audio" ? Buffer.from(doc.content) : doc.content,
+      content: doc.type === "audio" ? doc.content : doc.content.toString(),
       timestamp: doc.timestamp,
     }));
 

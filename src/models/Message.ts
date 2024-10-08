@@ -1,9 +1,15 @@
 import { Schema, model } from "mongoose";
 import { OutMessage } from "../utils/types";
 
+const type = (Schema: OutMessage) => Schema.type === "audio" ? Buffer : String;
+
 const messageSchema = new Schema<OutMessage>(
   {
-    userId: { type: Schema.Types.ObjectId, required: [true, "Set user id for the message"], ref: 'user'},
+    userId: {
+      type: Schema.Types.ObjectId,
+      required: [true, "Set user id for the message"],
+      ref: "user",
+    },
     userName: {
       type: String,
       required: [true, "Set user name for the message"],
@@ -14,7 +20,8 @@ const messageSchema = new Schema<OutMessage>(
       enum: ["audio", "text"],
     },
     content: {
-      type: Schema.Types.Mixed,
+        // type: type(messageSchema),
+      type: Buffer,
       required: [true, "Set message content"],
     },
     timestamp: {

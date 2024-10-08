@@ -22,9 +22,8 @@ export function setupSocketHandlers(io: Server) {
             sessionToken: user.sessionToken,
             user: { id: user._id, name: user.name },
           });
-          
-          const history = await msgHistoryService.getLastMessages();
 
+          const history = await msgHistoryService.getLastMessages();
           client.emit("history", history);
           io.emit("usersList", getUsersList());
         }
