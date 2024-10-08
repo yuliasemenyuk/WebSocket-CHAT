@@ -11,7 +11,7 @@ export const msgHistoryService = {
   },
 
   async getLastMessages(): Promise<OutMessage[] | []> {
-    const history = await MessageModel.find().limit(20);
+    const history = await MessageModel.find().sort({ timestamp: -1 }).limit(20);
 
     const plainHistory = history.map((doc) => ({
       // _id: doc._id.toString(),
@@ -22,6 +22,6 @@ export const msgHistoryService = {
       timestamp: doc.timestamp,
     }));
 
-    return plainHistory;
+    return plainHistory.sort((a, b) => a.timestamp - b.timestamp);
   },
 };
