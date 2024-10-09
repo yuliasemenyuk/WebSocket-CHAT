@@ -1,1 +1,1 @@
-# WebSocket-CHAT
+docker compose up -d

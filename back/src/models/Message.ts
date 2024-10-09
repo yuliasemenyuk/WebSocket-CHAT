@@ -1,8 +1,6 @@
 import { Schema, model } from "mongoose";
 import { OutMessage } from "../utils/types";
 
-const type = (Schema: OutMessage) => Schema.type === "audio" ? Buffer : String;
-
 const messageSchema = new Schema<OutMessage>(
   {
     userId: {
@@ -20,7 +18,6 @@ const messageSchema = new Schema<OutMessage>(
       enum: ["audio", "text"],
     },
     content: {
-        // type: type(messageSchema),
       type: Buffer,
       required: [true, "Set message content"],
     },
@@ -28,7 +25,10 @@ const messageSchema = new Schema<OutMessage>(
       type: Number,
       required: [true, "Set timestamp for the message"],
     },
-    sessionToken: {type: String, required: [true, "Set sender's session token"]}
+    sessionToken: {
+      type: String,
+      required: [true, "Set sender's session token"],
+    },
   },
   {
     versionKey: false,

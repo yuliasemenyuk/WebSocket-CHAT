@@ -16,7 +16,6 @@ export const msgHistoryService = {
     const history = await MessageModel.find().sort({ timestamp: -1 }).limit(20);
 
     const plainHistory = history.map((doc) => ({
-      // _id: doc._id.toString(),
       userId: doc.userId.toString(),
       userName: doc.userName,
       type: doc.type,

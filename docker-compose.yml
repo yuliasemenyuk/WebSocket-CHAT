@@ -1,0 +1,32 @@
+version: "2"
+
+services:
+  mongodb:
+    image: mongo:latest
+    environment: 
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+    volumes:
+      - ./mongo_data:/data/db
+    ports:
+      - 27017:27017 
+  api:
+    image: api
+    build: 
+      context: ./back
+    environment:
+      PORT: 3000
+      DB_URL: "mongodb://mongodb:27017/chat"
+      CHAT_LOG_PATH: /app/logs/chat.log
+    volumes:
+      - ./chat_log:/app/logs    
+    depends_on:
+      - mongodb
+  ui: 
+    image: ui
+    build: 
+      context: ./front
+    ports: 
+      - 3020:80
+    depends_on:
+      - api

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat</title>
+    <style>
+      body { visibility: hidden; }
+  </style>
+  </head>
+  <body >
+    <div id="loader">Loading...</div>
+  </div>
+    <div id="chat-container" style="display: none;">
+      <div id="messages-wrapper">
+        <ul id="chat-messages"></ul>
+      </div>
+      <div id="login-container">
+        <input type="text" id="username-input" placeholder="Enter your name" />
+        <button id="login-button">Join Chat</button>
+      </div>
+      <div id="status"></div>
+      <form id="chat-form">
+        <input type="text" id="message-input" placeholder="Type a message..." />
+        <button type="submit" id="send-button" disabled>Send</button>
+        <button type="button" id="voice-button" disabled>&#127908</button>
+      </form>
+    </div>
+  </body>
+</html>

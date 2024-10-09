@@ -2,6 +2,7 @@ import { Server, Socket } from "socket.io";
 import { userService } from "../services/userService";
 import { msgHistoryService } from "../services/msgHistoryService";
 import { ConnectedUsers, OutMessage } from "../utils/types";
+import { logMessageToFile } from "../utils/loggingHandler";
 
 export function setupSocketHandlers(io: Server) {
   const users: ConnectedUsers = {};
@@ -13,6 +14,7 @@ export function setupSocketHandlers(io: Server) {
     console.log("A client connected");
     client.emit("usersList", getUsersList());
 
+    //Case for user that already has session token
     client.on("login", async (sessionToken: string) => {
       try {
         const user = await userService.getUserBySessionToken(sessionToken);
@@ -22,6 +24,7 @@ export function setupSocketHandlers(io: Server) {
             name: user.name,
             sessionToken: user.sessionToken,
           };
+           // Send the session token back to the client
           client.emit("loginSuccess", {
             sessionToken: user.sessionToken,
             user: { id: user._id, name: user.name },
@@ -29,13 +32,17 @@ export function setupSocketHandlers(io: Server) {
           //Show last msgs to new user
           const history = await msgHistoryService.getLastMessages();
           client.emit("history", history);
+          //Notify the rest about new user and update user list
+          client.broadcast.emit("userConnected", { name: user.name });
           io.emit("usersList", getUsersList());
         }
       } catch (error) {
-        throw new Error("Failed to login");
+        console.error("Login error:", error);
+        client.emit("loginError");
       }
     });
 
+    //Case for new user
     client.on("create", async (userName: string) => {
       try {
         const user = await userService.createUser(userName);
@@ -53,7 +60,8 @@ export function setupSocketHandlers(io: Server) {
           //Show last msgs to new user
           const history = await msgHistoryService.getLastMessages();
           client.emit("history", history);
-          // Broadcast updated users list to all clients
+          //Notify the rest about new user and update user list
+          client.broadcast.emit("userConnected", { name: user.name });
           io.emit("usersList", getUsersList());
         } else {
           throw new Error("Failed to create user");
@@ -89,10 +97,10 @@ export function setupSocketHandlers(io: Server) {
               timestamp: message.timestamp || Date.now(),
               sessionToken: message.sessionToken,
             };
-            console.log(fullMessage);
             io.emit("message", fullMessage);
-            //Save to msg history
+            //Save to msg history and to the log file
             await msgHistoryService.saveMessage(fullMessage);
+            logMessageToFile(fullMessage);
             //Return message success status to sender
             client.emit("messageSuccess");
           }
@@ -108,8 +116,10 @@ export function setupSocketHandlers(io: Server) {
 
     client.on("disconnect", () => {
       if (users[client.id]) {
+        const name = users[client.id].name;
         delete users[client.id];
-        // Broadcast updated users list after a user disconnects
+        // Broadcast updated users list and notify others after a user disconnects
+        client.broadcast.emit("userDisonnected", { name: name });
         io.emit("usersList", getUsersList());
       }
     });

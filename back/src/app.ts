@@ -18,7 +18,6 @@ if (!DB_URL) {
 const corsOptions: cors.CorsOptions = {
   origin: FE_URL,
   methods: ["GET", "POST"],
-  // allowedHeaders: ["my-custom-header"],
   credentials: true,
 };
 
@@ -29,7 +28,6 @@ const io = new Server(server, {
 } as Partial<ServerOptions>);
 
 app.use(cors(corsOptions));
-app.use(express.json());
 
 mongoose.set("strictQuery", true);
 mongoose
