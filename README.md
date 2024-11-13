@@ -14,6 +14,7 @@ PORT = XXXX
 DB_URL = 'your mongo db url'
 FE_URL = "http://localhost:8080" (8080 - default webpack PORT or change to yours)
 Command:
+
 npm install
 
 tsc
@@ -25,6 +26,7 @@ UI:
 create .env file with variables:
 HOST = http://localhost:XXXX   //same as PORT in API
 Command:
+
 npm install
 
 tsc
